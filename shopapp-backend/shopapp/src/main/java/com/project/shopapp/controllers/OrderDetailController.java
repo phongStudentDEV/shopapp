@@ -2,7 +2,11 @@ package com.project.shopapp.controllers;
 
 import com.project.shopapp.dtos.OrderDTO;
 import com.project.shopapp.dtos.OrderDetailDTO;
+import com.project.shopapp.models.OrderDetail;
+import com.project.shopapp.responses.OrderDetailResponse;
+import com.project.shopapp.services.impl.OrderDetailService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,39 +17,63 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("${api.prefix}/order_details")
+@RequiredArgsConstructor
 public class OrderDetailController {
 
+    private final OrderDetailService orderDetailService;
+
     @PostMapping("")
-    public ResponseEntity<?> createOrderDetail(@Valid @RequestBody OrderDetailDTO orderDetailDTO){
-        return ResponseEntity.ok("Create order detail succesfully");
+    public ResponseEntity<?> createOrderDetail(@Valid @RequestBody OrderDetailDTO orderDetailDTO) {
+        try {
+            OrderDetail orderDetail = orderDetailService.createOrderDetail(orderDetailDTO);
+            OrderDetailResponse orderDetailResponse = OrderDetailResponse.formOrderDetail(orderDetail);
+            return ResponseEntity.ok(orderDetailResponse);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     @GetMapping("/order/{id}")
-    public ResponseEntity<?> getOrderDetail(@Valid @PathVariable("id") Long id){
-        return ResponseEntity.ok("lay ra 1 order detail co id = "+ id);
+    public ResponseEntity<?> getOrderDetail(@Valid @PathVariable("id") Long id) {
+        try {
+            OrderDetail orderDetail = orderDetailService.getOrderDetail(id);
+            return ResponseEntity.ok(OrderDetailResponse.formOrderDetail(orderDetail));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+
     }
+
     @GetMapping("/{id}")
-    public ResponseEntity<?> getOrderDetails(@Valid @PathVariable("id") Long id){
-        return ResponseEntity.ok("lay ra danh sach 1 order co id = "+ id);
+    public ResponseEntity<?> getOrderDetails(@Valid @PathVariable("id") Long id) {
+        List<OrderDetail> orderDetails = orderDetailService.findByOrderId(id);
+        List<OrderDetailResponse> orderDetailResponses = orderDetails.stream()
+                .map(orderDetail -> OrderDetailResponse.formOrderDetail(orderDetail)).toList();
+        return ResponseEntity.ok(orderDetailResponses);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<?> updateOrderDetail(@Valid @PathVariable("id") Long id,
-                                         @Valid @RequestBody OrderDetailDTO orderDTO){
+                                               @Valid @RequestBody OrderDetailDTO orderDTO) {
         try {
-            return ResponseEntity.ok("Cap nhat thanh cong");
-        }catch (Exception e){
+            OrderDetail orderDetailUpdate = orderDetailService.updateOrderDetail(id, orderDTO);
+            return ResponseEntity.ok(orderDetailUpdate);
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteOrderDetail(@Valid @PathVariable("id") Long id){
+    public ResponseEntity<?> deleteOrderDetail(@Valid @PathVariable("id") Long id) {
         try {
-            return ResponseEntity.ok("Xoa thanh cong");
-        }catch (Exception e){
+            orderDetailService.delete(id);
+            return ResponseEntity.ok()
+                    .body("Delete order detail with id = "+ id + " successfully");
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

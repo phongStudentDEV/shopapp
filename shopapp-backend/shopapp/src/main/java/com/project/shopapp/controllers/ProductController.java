@@ -1,6 +1,5 @@
 package com.project.shopapp.controllers;
 
-import com.github.javafaker.Faker;
 import com.project.shopapp.dtos.ProductDTO;
 import com.project.shopapp.dtos.ProductImageDTO;
 import com.project.shopapp.models.Product;
@@ -28,16 +27,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -49,6 +43,22 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ProductController {
     private final ProductService productService;
+
+    @PostMapping(value = "")
+    public ResponseEntity<?> createProduct(@Valid @RequestBody ProductDTO productDTO,
+                                           BindingResult result) {
+        try {
+            if (result.hasErrors()) {
+                List<String> errorMessages =
+                        result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
+                return ResponseEntity.badRequest().body(errorMessages);
+            }
+            Product newProduct = productService.createProduct(productDTO);
+            return ResponseEntity.ok(newProduct);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 
     @GetMapping("")
     public ResponseEntity<?> getProducts(@RequestParam("page") Integer page,
@@ -69,26 +79,10 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> getProductById(@PathVariable("id") Long id){
+    public ResponseEntity<?> getProductById(@PathVariable("id") Long id) {
         try {
             Product product = productService.getByIdProduct(id);
             return ResponseEntity.ok(ProductResponse.fromProduct(product));
-        }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
-        }
-    }
-
-    @PostMapping(value = "")
-    public ResponseEntity<?> createProduct(@Valid @RequestBody ProductDTO productDTO,
-                                           BindingResult result) {
-        try {
-            if (result.hasErrors()) {
-                List<String> errorMessages =
-                        result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
-                return ResponseEntity.badRequest().body(errorMessages);
-            }
-            Product newProduct = productService.createProduct(productDTO);
-            return ResponseEntity.ok(newProduct);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -100,7 +94,7 @@ public class ProductController {
         try {
             Product productUpdate = productService.updateProduct(id, productDTO);
             return ResponseEntity.ok(productUpdate);
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
 //        return ResponseEntity.ok("update product succssfully with id = " + id);
@@ -111,7 +105,7 @@ public class ProductController {
         try {
             productService.deleteProduct(id);
             return ResponseEntity.ok("Delete product succssfully with id = " + id);
-        }catch (Exception e){
+        } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }

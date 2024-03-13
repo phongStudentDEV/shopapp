@@ -1,18 +1,19 @@
 package com.project.shopapp.services;
 
 import com.project.shopapp.dtos.OrderDTO;
+import com.project.shopapp.models.Order;
 import com.project.shopapp.responses.OrderResponse;
 
 import java.util.List;
 
 public interface IOrderService {
-    OrderResponse createCategory(OrderDTO orderDTO);
+    Order createOrder(OrderDTO orderDTO) throws Exception;
 
-    OrderResponse getCategoryById(Long id);
+    Order getOrderById(Long id);
 
-    List<OrderResponse> getAllCategories();
+    List<Order> getOrders(Long userId);
 
-    OrderResponse updateCategory(Long id, OrderDTO orderDTO);
+    Order updateOrder(Long id, OrderDTO orderDTO) throws Exception;
 
-    void deleteCategory(Long id);
+    void deleteOrder(Long id);
 }

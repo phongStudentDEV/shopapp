@@ -14,8 +14,14 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 @Table(name = "users")
 @Entity
@@ -25,7 +31,7 @@ import java.util.Date;
 @Setter
 @Builder
 @Data
-public class User extends BaseEntity {
+public class User extends BaseEntity implements  UserDetails{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -58,4 +64,41 @@ public class User extends BaseEntity {
     @ManyToOne
     @JoinColumn(name = "role_id")
     private Role role;
+
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        // lay ra roles
+        List<SimpleGrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority("ROLE_"+ getRole().getName()));
+        return authorities;
+    }
+
+    @Override
+    public String getUsername() {
+        // là trường duy nhất dùng để đăng nhập
+        return phoneNumber;
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        // Hiện tại để vô thời hạn
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        // Hiện tại không để khoá user
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

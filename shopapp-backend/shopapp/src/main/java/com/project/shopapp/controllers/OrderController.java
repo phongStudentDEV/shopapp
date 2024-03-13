@@ -1,7 +1,11 @@
 package com.project.shopapp.controllers;
 
 import com.project.shopapp.dtos.OrderDTO;
+import com.project.shopapp.models.Order;
+import com.project.shopapp.responses.OrderResponse;
+import com.project.shopapp.services.impl.OrderService;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
@@ -18,7 +22,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("${api.prefix}/orders")
+@RequiredArgsConstructor
 public class OrderController {
+
+    private final OrderService orderService;
 
     @PostMapping("")
     public ResponseEntity<?> createOrder(@Valid @RequestBody OrderDTO orderDTO, BindingResult result){
@@ -28,17 +35,29 @@ public class OrderController {
                         result.getFieldErrors().stream().map(FieldError::getDefaultMessage).toList();
                 return ResponseEntity.badRequest().body(errorMessages);
             }
-
-            return ResponseEntity.ok("Create order successfully");
+            Order order = orderService.createOrder(orderDTO);
+            return ResponseEntity.ok("Create order successfully "+ order);
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
-    @GetMapping("/{user_id}")
+    @GetMapping("/user/{user_id}")
     public ResponseEntity<?> getOrders(@Valid @PathVariable("user_id") Long userId){
         try {
-            return ResponseEntity.ok("Lay ra danh sach order cuar 1 user");
+            List<Order> orders = orderService.getOrders(userId);
+            return ResponseEntity.ok(orders);
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getOrder(@Valid @PathVariable("id") Long orderId){
+        try {
+            Order order = orderService.getOrderById(orderId);
+            return ResponseEntity.ok(order);
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -48,7 +67,8 @@ public class OrderController {
     public ResponseEntity<?> updateOrder(@Valid @PathVariable("id") Long id,
                                          @Valid @RequestBody OrderDTO orderDTO){
         try {
-            return ResponseEntity.ok("Cap nhat thanh cong");
+            Order orderUpdate = orderService.updateOrder(id, orderDTO);
+            return ResponseEntity.ok(orderUpdate);
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -57,6 +77,7 @@ public class OrderController {
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteOrder(@Valid @PathVariable("id") Long id){
         try {
+            orderService.deleteOrder(id);
             return ResponseEntity.ok("Xoa thanh cong");
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
