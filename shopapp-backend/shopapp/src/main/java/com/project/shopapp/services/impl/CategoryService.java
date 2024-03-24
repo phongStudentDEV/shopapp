@@ -1,5 +1,6 @@
 package com.project.shopapp.services.impl;
 
+import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.CategoryDTO;
 import com.project.shopapp.models.Category;
 import com.project.shopapp.repositories.CategoryRepository;
@@ -15,6 +16,8 @@ import java.util.zip.DataFormatException;
 public class CategoryService implements ICategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final LocalizationUtils localizationUtils;
+
 
     @Override
     public Category createCategory(CategoryDTO categoryDTO) {

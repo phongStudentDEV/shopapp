@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 @Table(name = "users")
 @Entity
@@ -31,7 +32,7 @@ import java.util.List;
 @Setter
 @Builder
 @Data
-public class User extends BaseEntity implements  UserDetails{
+public class User extends BaseEntity implements UserDetails {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -70,7 +71,7 @@ public class User extends BaseEntity implements  UserDetails{
     public Collection<? extends GrantedAuthority> getAuthorities() {
         // lay ra roles
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority("ROLE_"+ getRole().getName()));
+        authorities.add(new SimpleGrantedAuthority("ROLE_" + getRole().getName().toUpperCase()));
         return authorities;
     }
 

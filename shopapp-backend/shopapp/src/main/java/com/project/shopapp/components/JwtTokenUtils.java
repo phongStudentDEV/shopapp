@@ -42,7 +42,7 @@ public class JwtTokenUtils {
                     .compact();
             return token;
         } catch (Exception e) {
-            throw new DataNotFoundException("Cannot create jwt token, error: "+e.getMessage());
+            throw new DataNotFoundException("Cannot create jwt token, error: " + e.getMessage());
         }
     }
 
@@ -52,21 +52,21 @@ public class JwtTokenUtils {
     }
 
     // lấy ra các thông tin trong claims
-    private Claims extractAllClaims(String token){
+    private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSignInKey())
                 .build()
-                .parseClaimsJwt(token)
+                .parseClaimsJws(token)
                 .getBody();
     }
 
-    public  <T> T extractClaim(String token, Function<Claims, T> claimsResolver){
+    public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = this.extractAllClaims(token);
         return claimsResolver.apply(claims);
     }
 
     // Kiểm tra token đã hết hạn chưa
-    public Boolean isTokenExpired(String token){
+    public Boolean isTokenExpired(String token) {
         Date expirationDate = this.extractClaim(token, Claims::getExpiration);
         return expirationDate.before(new Date());
     }
@@ -77,5 +77,14 @@ public class JwtTokenUtils {
         random.nextBytes(keyBytes);
         String secretKey = Encoders.BASE64.encode(keyBytes);
         return secretKey;
+    }
+
+    public String extractPhoneNumber(String token) {
+        return extractClaim(token, Claims::getSubject);
+    }
+
+    public Boolean validateToken(String token, UserDetails userDetails) {
+        String phoneNumber = extractPhoneNumber(token);
+        return (phoneNumber.equals(userDetails.getUsername()) && !isTokenExpired(token));
     }
 }

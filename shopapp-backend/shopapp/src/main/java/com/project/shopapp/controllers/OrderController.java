@@ -1,9 +1,11 @@
 package com.project.shopapp.controllers;
 
+import com.project.shopapp.components.LocalizationUtils;
 import com.project.shopapp.dtos.OrderDTO;
 import com.project.shopapp.models.Order;
 import com.project.shopapp.responses.OrderResponse;
 import com.project.shopapp.services.impl.OrderService;
+import com.project.shopapp.utils.MessageKeys;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -26,6 +28,8 @@ import java.util.List;
 public class OrderController {
 
     private final OrderService orderService;
+    private final LocalizationUtils localizationUtils;
+
 
     @PostMapping("")
     public ResponseEntity<?> createOrder(@Valid @RequestBody OrderDTO orderDTO, BindingResult result){
@@ -36,7 +40,7 @@ public class OrderController {
                 return ResponseEntity.badRequest().body(errorMessages);
             }
             Order order = orderService.createOrder(orderDTO);
-            return ResponseEntity.ok("Create order successfully "+ order);
+            return ResponseEntity.ok(order);
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
@@ -78,9 +82,10 @@ public class OrderController {
     public ResponseEntity<?> deleteOrder(@Valid @PathVariable("id") Long id){
         try {
             orderService.deleteOrder(id);
-            return ResponseEntity.ok("Xoa thanh cong");
+           return ResponseEntity.ok(localizationUtils.getLocalizedMessage(MessageKeys.DELETE_ORDER_SUCCESSFULLY));
         }catch (Exception e){
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body(
+                    localizationUtils.getLocalizedMessage(MessageKeys.DELETE_ORDER_SUCCESSFULLY));
         }
     }
 
